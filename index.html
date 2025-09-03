@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมจัดอันดับกีฬาสี</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for a friendly look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- html2canvas for exporting to JPG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Mitr', sans-serif;
+            background-color: #FFF8E1; /* Pastel background color */
+        }
+        .leaderboard-card, .tab-btn, .modal-content {
+            transition: all 0.3s ease-in-out;
+        }
+        .tab-btn.active {
+            border-bottom-color: #F59E0B; /* amber-500 */
+            color: #D97706; /* amber-600 */
+            background-color: #FFFBEB; /* amber-50 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Animation for modals */
+        .modal.hidden .modal-content {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        .modal .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Main Application Container -->
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-5xl">
+        
+        <!-- Header -->
+        <header class="text-center mb-6 relative">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-600">🏆 Sports Day Ranking 🏆</h1>
+            <p class="text-lg text-gray-500 mt-2">จัดอันดับคะแนนกีฬาสี โรงเรียนบ้านโคกเมือง ปีการศึกษา 2568</p>
+            <div class="absolute top-0 right-0 flex items-center space-x-1">
+                <button id="notificationBtn" class="relative text-gray-500 hover:text-amber-600 p-3 rounded-full transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
+                    </svg>
+                    <span id="notificationBadge" class="absolute top-2 right-2 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white hidden"></span>
+                </button>
+                <button id="settingsBtn" class="text-gray-500 hover:text-amber-600 p-3 rounded-full transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+                        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311a1.464 1.464 0 0 1-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413-1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.858 2.929 2.929 0 0 1 0 5.858z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="flex justify-center border-b-2 border-gray-200 mb-6">
+            <button data-tab="main" class="tab-btn active text-lg font-semibold py-3 px-6 border-b-4 border-transparent hover:bg-amber-50 rounded-t-lg">หน้าสรุปคะแนน</button>
+            <button data-tab="sports" class="tab-btn text-lg font-semibold py-3 px-6 border-b-4 border-transparent hover:bg-amber-50 rounded-t-lg">กีฬาประเภททีม</button>
+            <button data-tab="athletics" class="tab-btn text-lg font-semibold py-3 px-6 border-b-4 border-transparent hover:bg-amber-50 rounded-t-lg">กรีฑา</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div id="main-tab" class="tab-content active">
+            <main id="leaderboard" class="space-y-4 relative">
+                <!-- Leaderboard cards will be dynamically inserted here -->
+            </main>
+            <div id="admin-main-controls" class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4 hidden">
+                 <button id="clearNotificationsBtn" class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    🧹 ล้างการแจ้งเตือน
+                </button>
+                <button id="exportBtn" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    🖼️ Export เป็นรูปภาพ (JPG)
+                </button>
+            </div>
+        </div>
+
+        <div id="sports-tab" class="tab-content">
+            <div id="sports-table-container"></div>
+            <button id="addSportsBtn" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 hidden">
+                ➕ เพิ่มรายการกีฬา
+            </button>
+        </div>
+
+        <div id="athletics-tab" class="tab-content">
+            <div id="athletics-table-container"></div>
+            <button id="addAthleticsBtn" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 hidden">
+                ➕ เพิ่มรายการกรีฑา
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+     <!-- Password Modal -->
+    <div id="passwordModal" class="modal fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center p-4 hidden z-50">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <h2 class="text-2xl font-bold text-amber-600 mb-4">Admin Login</h2>
+            <form id="passwordForm">
+                <label for="passwordInput" class="block text-sm font-medium text-gray-700">กรุณาใส่รหัสผ่าน:</label>
+                <input type="password" id="passwordInput" class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
+                <p id="passwordError" class="text-red-500 text-sm mt-1 hidden">รหัสผ่านไม่ถูกต้อง</p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="close-modal-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full">ยกเลิก</button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-lg">เข้าสู่ระบบ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Event Modal -->
+    <div id="eventModal" class="modal fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center p-4 hidden z-50">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+            <h2 id="eventModalTitle" class="text-2xl font-bold text-amber-600 mb-4">เพิ่มรายการ</h2>
+            <form id="eventForm">
+                <input type="hidden" id="eventType">
+                <input type="hidden" id="editEventId">
+                <label for="eventNames" class="block text-sm font-medium text-gray-700">ชื่อรายการ:</label>
+                <textarea id="eventNames" rows="5" class="mt-1 w-full p-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500" placeholder="ตัวอย่าง:&#10;ฟุตบอล, ชาย ป.6"></textarea>
+                <p id="addEventHelp" class="text-xs text-gray-500 mt-1">* รูปแบบ: ชื่อกีฬา, รุ่น (คั่นด้วยจุลภาค) สามารถเพิ่มหลายรายการโดยขึ้นบรรทัดใหม่</p>
+                <p id="editEventHelp" class="text-xs text-gray-500 mt-1 hidden">* รูปแบบ: ชื่อกีฬา, รุ่น (คั่นด้วยจุลภาค)</p>
+                <div class="mt-6 text-center">
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full shadow-lg">บันทึก</button>
+                    <button type="button" class="close-modal-btn ml-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full">ยกเลิก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Select Winners Modal -->
+    <div id="winnerModal" class="modal fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center p-4 hidden z-50">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+            <h2 id="winnerModalTitle" class="text-2xl font-bold text-amber-600 mb-4">เลือกทีมที่ชนะ</h2>
+            <form id="winnerForm">
+                <input type="hidden" id="winnerEventType">
+                <input type="hidden" id="winnerEventId">
+                <input type="hidden" id="winnerMedalType">
+                <div id="winner-teams-checkboxes" class="grid grid-cols-2 gap-4">
+                    <!-- Winner checkboxes will be inserted here -->
+                </div>
+                <div class="mt-6 text-center">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-lg">ยืนยัน</button>
+                    <button type="button" class="close-modal-btn ml-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full">ยกเลิก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center p-4 hidden z-50">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <h2 class="text-2xl font-bold text-red-600 mb-3">ยืนยันการลบ</h2>
+            <p id="confirmModalMessage" class="text-gray-700">คุณต้องการลบรายการนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="confirmCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-full">ยกเลิก</button>
+                <button id="confirmAcceptBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full shadow-lg">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Update Toast Notification -->
+    <div id="updateToast" class="fixed bottom-5 right-5 text-white py-3 px-6 rounded-full shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 z-50">
+        🔔 มีการอัปเดตข้อมูลล่าสุด!
+    </div>
+    
+    <!-- Div for JPG Export (Dynamically populated, positioned off-screen) -->
+    <div id="exportContainer" class="fixed top-0 left-0 w-[800px] p-10 -translate-x-[9999px]">
+        <!-- Content for export is generated here -->
+    </div>
+
+    <script type="module" src="script.min.js"></script>
+	
+</body>
+</html>
+
