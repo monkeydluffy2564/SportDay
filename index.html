@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรแกรมจัดอันดับกีฬาสี</title>
+    <title>กีฬาสี (2568)</title>
     
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -43,6 +43,19 @@
         .modal .modal-content {
             transform: scale(1);
             opacity: 1;
+        }
+        .dragging {
+            opacity: 0.5;
+            background: #fef9c3;
+        }
+        .drag-over {
+            border-top: 2px solid #F59E0B;
+        }
+        .draggable-item, .draggable-group {
+            cursor: grab;
+        }
+        .draggable-item:active, .draggable-group:active {
+            cursor: grabbing;
         }
     </style>
 </head>
@@ -214,4 +227,3 @@
 	
 </body>
 </html>
-
